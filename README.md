@@ -5,7 +5,7 @@ This application finds the fastest flight from city A to city B given the list o
 
 ## How to use it
 ```
-$> ./flights.exe list_of_flights.txt city_A city_B
+> ./flights.exe list_of_flights.txt city_A city_B
 ```
 
 ## How does the flight list look
@@ -24,4 +24,4 @@ Vilnius Warsaw 1100 0120
 
 ## How does it work
 
-This application stores flight data as a graph using neighbour adjacency lists.
+This application stores flight data as a graph using neighbour adjacency lists. Uses Dijkstra's algorithm to determine shortest path between two cities.
