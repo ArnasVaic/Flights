@@ -15,7 +15,14 @@ void print_tabs(FILE *os, size_t n);
 void print_flight(FILE *os, const void *data, size_t ident);
 void print_gnode(FILE *os, const void *data, size_t ident);
 
-void print_list(FILE *os, list_t list, print_func_t f, size_t ident, char end);
+void print_list(FILE *os, 
+    list_t* list, 
+    void (*print_func_t)(FILE *, const void *, size_t), 
+    size_t ident, 
+    char sep,
+    uint8_t nl,
+    char end
+);
 
 void print_graph(FILE *os, graph_t *g);
 
