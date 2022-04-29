@@ -1,9 +1,9 @@
 #include <graph.h>
 
-gnode_t* create_gnode(const void *data, size_t size) {
+graph_node_t* create_graph_node(const void *data, size_t size) {
     assert(data);
     assert(size > 0);
-    gnode_t *node = (gnode_t*) __malloc(sizeof(gnode_t));
+    graph_node_t *node = (graph_node_t*) __malloc(sizeof(graph_node_t));
     assert(node);
     node->data = __malloc(size);
     assert(node->data);
@@ -12,14 +12,13 @@ gnode_t* create_gnode(const void *data, size_t size) {
     return node;
 }
 
-void free_gnode(
-    gnode_t *node, 
-    free_func_t f1 /* knows how to free data asociated with the node itself */, 
-    free_func_t f2 /* knows how to free node list elements */
+void free_graph_node(
+    graph_node_t *node, 
+    free_func_t free_node_data /* knows how to free data asociated with the node itself */, 
+    free_func_t free_list_elem /* knows how to free node list elements */
 ) {
-    f1(node->data);
-    free_list(&(node->adj), f2);
-    __free(node);
+    free_node_data(node->data);
+    free_list(node->adj, free_list_elem);
 }
 
 graph_t* create_graph() {
@@ -29,11 +28,11 @@ graph_t* create_graph() {
     return g;
 }
 
-gnode_t* get_node(graph_t *g, const void *data, size_t size) {
-    node_t *head = g->nodes.head;
-    node_t *tail = g->nodes.tail;
-    for(node_t *it = head; it; it = it->next) {
-        gnode_t *node = (gnode_t*)it->data;
+graph_node_t* get_node(graph_t *g, const void *data, size_t size) {
+    list_node_t *head = g->nodes->head;
+    list_node_t *tail = g->nodes->tail;
+    for(list_node_t *it = head; it; it = it->next) {
+        graph_node_t *node = (graph_node_t*)it->data;
         if(memcmp(node->data, data, size) == 0) {
             return node;
         }
@@ -46,23 +45,52 @@ uint8_t node_exists(graph_t *g, const void *data, size_t size) {
 }
 
 void add_node(graph_t *g, const void *data, size_t size) {
-    gnode_t *node = create_gnode(data, size);
-    push_back(&(g->nodes), node, sizeof(gnode_t));
+    // fields of this node do not live inside and get
+    // copied while `node` is only a shell to give to push_back.
+    // after push_back the ownership is transfered to g->nodes 
+    // so it can be freed while insides live on 
+    graph_node_t *node = create_graph_node(data, size);
+    push_back(g->nodes, node, sizeof(graph_node_t));
+    __free(node); 
     g->size++;
 }
 
-void free_graph(graph_t *g, free_func_t f1, free_func_t f2) {
-    list_t list = g->nodes;
-    if(list.size == 0) return;
-    node_t *it = list.head;
-    while(it) {
-        node_t *temp = it;
-        it = it->next;
+list_t* shortest_path(graph_t *g , const void *p, const void *q, cmp_func_t func) {
+    /// Implementation based on Dijkstra's algorithm:
+    /// https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+    list_t *path = create_list();
+    pqueue_t *pq = create_pq(NULL);
 
-        // improv free_node()
-        free_gnode(temp->data, f1, f2);
-        __free(temp);
+    // TODO: figure out how to implement this algorithm
+
+
+    free_pq(pq, NULL);
+    return path;
+}
+
+void free_graph(
+    graph_t *g, 
+    free_func_t free_node_data, 
+    free_func_t free_list_elem
+) {
+    // can't use list_free() because free_graph_node 
+    // requires more args than free_func_t
+    list_t *list = g->nodes;
+    if(list->size != 0) {
+        list_node_t *it = list->head;
+        while(it) {
+            list_node_t *temp = it;
+            it = it->next;
+
+            // can't use free_list_node() for the same reason
+            graph_node_t *gn = (graph_node_t*) temp->data;
+            free_graph_node(gn, free_node_data, free_list_elem); // frees whats inside of gnode
+
+            __free(gn);
+            __free(temp);
+        }
     }
-    // each element in list has been freed
+
+    __free(g->nodes);
     __free(g);
 }
