@@ -7,7 +7,7 @@
 
 // My headers
 #include <graph.h>
-#include <memory.h>
+#include <mymem.h>
 
 // Longest city name in the world is 85 characters
 #define MAX_CITY_NAME_LEN 128

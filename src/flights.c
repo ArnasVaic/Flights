@@ -4,12 +4,10 @@ void free_flight(void *ptr) {
     flight_t *f = (flight_t*) ptr;
     __free(f->orig);
     __free(f->dest);
-    __free(f);
 }
 
 graph_t* read_flights(const char* file) {
     FILE *is = fopen(file, "rb");
-
     graph_t *g = create_graph();
     
     size_t cnt = 0;
@@ -19,25 +17,31 @@ graph_t* read_flights(const char* file) {
         f.dest = __malloc(MAX_CITY_NAME_LEN * sizeof(char));
         fscanf(is, "%s %s %lf %lf", f.orig, f.dest, &f.leave, &f.duration);
         const size_t len = (strlen(f.orig) + 1) * sizeof(char);
+        
         if(!node_exists(g, f.orig, len)) {
             add_node(g, f.orig, len);
             ++cnt;
         }
-        gnode_t *node = get_node(g, f.orig, len);
-        push_back(&(node->adj), &f, sizeof(flight_t));
+        
+        graph_node_t *node = get_node(g, f.orig, len);
+        push_back(node->adj, &f, sizeof(flight_t));
     }
+    
     fclose(is);
     return g;
 }
 
 flight_t* get_shortest_flight(graph_t *g, const char *c1, const char *c2) {
+    assert(c1);
+    assert(c2);
+
     size_t size = (strlen(c1) + 1) * sizeof(char);
-    gnode_t *node = get_node(g, c1, size);
+    graph_node_t *node = get_node(g, c1, size);
     if(node == NULL) return NULL;
-    list_t list = node->adj;
+    list_t *list = node->adj;
     double min_time = __DBL_MAX__;
-    node_t *min_it = NULL;
-    for(node_t *it = list.head; it; it = it->next) {
+    list_node_t *min_it = NULL;
+    for(list_node_t *it = list->head; it; it = it->next) {
         const double t = ((flight_t*)it->data)->duration;
         if(min_time > t) {
             min_time = t;
