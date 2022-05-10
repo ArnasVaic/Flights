@@ -12,7 +12,7 @@
 // Node data structure for the priority queue
 typedef struct pq_node_t {
 	void* data;
-	int64_t prio;
+	double prio;
 	struct pq_node_t *next;
 } pq_node_t;
 
@@ -39,7 +39,7 @@ uint8_t is_pq_empty(pqueue_t *pq, int *errnum);
 /// @param prio priority value of this element
 /// @param errnum error number
 /// @return nothing
-void pq_push(pqueue_t *pq, void *data, size_t size, int64_t prio, int *errnum);
+void pq_push(pqueue_t *pq, void *data, size_t size, double prio, int *errnum);
 
 /// Pop the element with the highest priority from priority queue
 /// @param pq pointer to priority queue
