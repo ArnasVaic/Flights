@@ -24,4 +24,4 @@ Vilnius Warsaw 1100 0120
 
 ## How does it work
 
-This application stores flight data as a graph using neighbour adjacency lists. Uses Dijkstra's algorithm to determine shortest path between two cities.
+This application stores flight data as a graph using neighbour adjacency lists. Uses Floyd-Warshall algorithm to determine shortest path between two cities.
