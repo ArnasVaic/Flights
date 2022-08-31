@@ -1,4 +1,4 @@
-# Flights
+# Flights 🚀
 
 ## What does it do
 This application finds the fastest flight from city A to city B given the list of all flights.
